@@ -19,3 +19,20 @@ self.addEventListener("install", (evt) => {
     );
     self.skipWaiting();
 });
+
+//Activating Service Worker
+self.addEventListener("activate", (evt) => {
+    evt.waitUntil(
+        caches.keys().then((keyList) => {
+            return Promise.all(
+                keyList.map((key) => {
+                    if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+                        console.log("Deleting Old Caches Data", key);
+                        return caches.delete(key);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
+});

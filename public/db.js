@@ -1,37 +1,42 @@
-const { response } = require("express");
-const { get } = require("mongoose");
+const indexedDB =
+    window.indexedDB ||
+    window.mozIndexedDB ||
+    window.webkitIndexedDB ||
+    window.msIndexedDB ||
+    window.shimIndexedDB;
 
 let db;
-const request = indexedDB.open("budget", 1);
+let request = indexedDB.open("pending", 1);
 
-request.obupgradeneeded = function (event) {
-    const db = event.target.result;
+request.onupgradeneeded = function (event) {
+    db = event.target.result;
     db.createObjectStore("pending", { autoIncrement: true });
 };
 
 request.onsuccess = function (event) {
     db = event.target.result;
 
-    if (navigator.onLine) {
+    // check if app is online before reading from db
+    if (navigator.online) {
         checkDatabase();
     }
 };
 
 request.onerror = function (event) {
-    console.log("An error has occured! Error Code: " + event.target.errorCode);
+    console.log("Woops! " + event.target.errorCode);
 };
 
 function saveRecord(record) {
-    const transaction = db.transaction(["pending"], "readwrite");
-    const store = transaction.objectStore("pending");
+    let transaction = db.transaction("pending", "readwrite");
+    let store = transaction.objectStore("pending");
 
     store.add(record);
 }
 
 function checkDatabase() {
-    const transaction = db.transaction(["pending"], "readwrite");
-    const store = transaction.objectStore("pending");
-    const getAll = store.getAll();
+    let transaction = db.transaction("pending", "readwrite");
+    let store = transaction.objectStore("pending");
+    let getAll = store.getAll();
 
     getAll.onsuccess = function () {
         if (getAll.result.length > 0) {
@@ -45,10 +50,8 @@ function checkDatabase() {
             })
                 .then((response) => response.json())
                 .then(() => {
-                    const transaction = db.transaction(
-                        ["pending"],
-                        "readwrite"
-                    );
+                    // delete records if successful
+                    const transaction = db.transaction("pending", "readwrite");
                     const store = transaction.objectStore("pending");
                     store.clear();
                 });
@@ -56,4 +59,5 @@ function checkDatabase() {
     };
 }
 
+// listen for app coming back online
 window.addEventListener("online", checkDatabase);

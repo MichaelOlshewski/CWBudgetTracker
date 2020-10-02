@@ -24,7 +24,7 @@ If you are running this on Heroku, or other similar platforms, you will have to 
 
 If you are running this app on Heroku, you will want to ensure that the setup has successfully passed, and then launch the app with the URL that is set by heroku.
 
-If you are running this app locally, you will want to navigate to `http://localhost:` and the port that you declared in the `.env` file. If you did not set the port variable, then the default is set to port `5000`.
+If you are running this app locally, you will want to navigate to `http://localhost:` and the port that you declared in the `.env` file. If you did not set the port variable, then the default is set to port `3000`.
 
 <hr>
 
